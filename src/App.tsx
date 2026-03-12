@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-
+import alrawiIcon from './public/images/alrawiikon.png';
 import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import {
@@ -1326,11 +1326,10 @@ const Footer = () => {
         >
           <div className="flex items-center gap-3">
             <img
-              src="src/public/images/alrawiikon.png"
-              alt="Yasir Alrawi"
-              className="h-7"
-              referrerPolicy="no-referrer"
-            />
+  src={alrawiIcon}
+  alt="Yasir Alrawi"
+  className="h-7"
+/>
             <span className="text-[#888] text-xs uppercase tracking-widest">
               2026 Alrawi. All rights reserved
             </span>

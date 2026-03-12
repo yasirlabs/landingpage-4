@@ -2,83 +2,6 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import alrawiikon from "./public/images/alrawiikon.png";
-import alrawiLogo from "./public/images/alrawiLogo.png";
-import arrowAirplane from "./public/images/arrow-airplane-ilist.png";
-import arrowIlist from "./public/images/arrow-ilist.png";
-import dahsedIlist from "./public/images/dahsed-ilist.png";
-import design01 from "./public/images/design-01.png";
-import design02 from "./public/images/design-02.png";
-import footerBg from "./public/images/footer-bg.png";
-import footerCom from "./public/images/footer-com.png";
-import footerYasir from "./public/images/footer-yasir.png";
-import heroBg from "./public/images/hero-bg.png";
-import heroYasir from "./public/images/hero-yasir.png";
-import huaweiLogo from "./public/images/huaweiLogo.png";
-import icoSoc01 from "./public/images/ico_soc-01.svg";
-import icoSoc02 from "./public/images/ico_soc-02.svg";
-import icoSoc03 from "./public/images/ico_soc-03.svg";
-import icoSoc04 from "./public/images/ico_soc-04.svg";
-import icoSoc05 from "./public/images/ico_soc-05.svg";
-import logo from "./public/images/logo.png";
-import numb01 from "./public/images/numb-01.png";
-import numb02 from "./public/images/numb-02.png";
-import numb03 from "./public/images/numb-03.png";
-import numb04 from "./public/images/numb-04.png";
-import numb05 from "./public/images/numb-05.png";
-import numb06 from "./public/images/numb-06.png";
-import paperAirplane from "./public/images/paper-airplane.png";
-import paypalLogo from "./public/images/paypalLogo.png";
-import person01 from "./public/images/person-01.png";
-import person02 from "./public/images/person-02.png";
-import person03 from "./public/images/person-03.png";
-import programming01 from "./public/images/programming-01.png";
-import programming02 from "./public/images/programming-02.png";
-import seo01 from "./public/images/seo-01.png";
-import seo02 from "./public/images/seo-02.png";
-import transferWiseLogo from "./public/images/TransferWiseLogo.png";
-import womenIlist from "./public/images/women_ilist.png";
-import wooCommerceLogo from "./public/images/WooCommerceLogo.png";
-
-export const images = {
-  alrawiikon,
-  alrawiLogo,
-  arrowAirplane,
-  arrowIlist,
-  dahsedIlist,
-  design01,
-  design02,
-  footerBg,
-  footerCom,
-  footerYasir,
-  heroBg,
-  heroYasir,
-  huaweiLogo,
-  icoSoc01,
-  icoSoc02,
-  icoSoc03,
-  icoSoc04,
-  icoSoc05,
-  logo,
-  numb01,
-  numb02,
-  numb03,
-  numb04,
-  numb05,
-  numb06,
-  paperAirplane,
-  paypalLogo,
-  person01,
-  person02,
-  person03,
-  programming01,
-  programming02,
-  seo01,
-  seo02,
-  transferWiseLogo,
-  womenIlist,
-  wooCommerceLogo,
-};
 
 import React, { useState, useEffect } from "react";
 import { motion } from "motion/react";
@@ -115,9 +38,9 @@ const springScrollTo = (targetY: number) => {
   if (springRAF !== null) cancelAnimationFrame(springRAF);
 
   // Yay sabitleri — stiffness düşük + damping düşük = çok elastik
-  const stiffness = 0.045; // ne kadar sert çeker (düşük = yumuşak)
-  const damping = 0.62; // ne kadar sönümlenir (düşük = çok sallanır)
-  const mass = 1;
+  const stiffness = 0.045;   // ne kadar sert çeker (düşük = yumuşak)
+  const damping   = 0.62;    // ne kadar sönümlenir (düşük = çok sallanır)
+  const mass      = 1;
 
   let position = window.scrollY;
   let velocity = 0;
@@ -127,9 +50,9 @@ const springScrollTo = (targetY: number) => {
     const dt = lastTime ? Math.min((now - lastTime) / 16, 4) : 1; // normalize ~60fps
     lastTime = now;
 
-    const force = (targetY - position) * stiffness;
-    const damper = velocity * damping;
-    const accel = (force - damper) / mass;
+    const force    = (targetY - position) * stiffness;
+    const damper   = velocity * damping;
+    const accel    = (force - damper) / mass;
 
     velocity += accel * dt;
     position += velocity * dt;
@@ -150,7 +73,10 @@ const springScrollTo = (targetY: number) => {
 };
 
 const useSmoothNav = () => {
-  const handleNav = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+  const handleNav = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    id: string,
+  ) => {
     e.preventDefault();
     const el = document.getElementById(id);
     if (!el) return;
@@ -243,7 +169,7 @@ const Navbar = () => {
               className={
                 isMobile ? "w-9 h-9 object-contain" : "w-12 h-12 object-contain"
               }
-              src={images.logo}
+              src="src/public/images/logo.png"
               alt="Alrawi Logo"
             />
             <span
@@ -427,7 +353,7 @@ const Hero = () => {
     <section
       id="about"
       style={{
-        backgroundImage: "url("+images.heroBg+")",
+        backgroundImage: "url(src/public/images/hero-bg.png)",
         backgroundSize: "cover",
         backgroundPosition: "center",
         minHeight: "100vh",
@@ -535,7 +461,7 @@ const Hero = () => {
               }}
             >
               <img
-                src={images.heroYasir}
+                src="src/public/images/hero-yasir.png"
                 alt="Hero"
                 style={{ width: "100%", maxWidth: "720px", height: "auto" }}
                 referrerPolicy="no-referrer"
@@ -565,14 +491,14 @@ const Hero = () => {
             }}
           >
             {[
-              images.transferWiseLogo,
-              images.wooCommerceLogo,
-              images.huaweiLogo,
-              images.paypalLogo,
+              "TransferWiseLogo",
+              "WooCommerceLogo",
+              "huaweiLogo",
+              "paypalLogo",
             ].map((logo) => (
               <img
                 key={logo}
-                src={logo}
+                src={`src/public/images/${logo}.png`}
                 alt={logo}
                 style={{ height: isMobile ? "24px" : "40px" }}
                 referrerPolicy="no-referrer"
@@ -596,19 +522,19 @@ const Stats = () => {
       value: ".200+",
       description:
         "Ideal courses to sell physical and digital products from your site on WordPress.com",
-      icon: images.numb01,
+      icon: "src/public/images/numb-01.png",
     },
     {
       value: ".150+",
       description:
         "Experts share their knowledge on building and growing a web presence.",
-      icon: images.numb02,
+      icon: "src/public/images/numb-02.png",
     },
     {
       value: ".10k+",
       description:
         "Small businesses and online stores call WordPress.com home. No code, no complexities.",
-      icon: images.numb03,
+      icon: "src/public/images/numb-03.png",
     },
   ];
 
@@ -700,19 +626,19 @@ const Syllabus = () => {
       num: "01",
       title: "Videos from professionals",
       desc: "Our specialists will help you create any website. With our help, you can handle any task, also you get a personalized consultation.",
-      icon: images.numb04,
+      icon: "src/public/images/numb-04.png",
     },
     {
       num: "02",
       title: "Practical independent work",
       desc: "Learn how to organize your website, create engaging content, protect your site, and achieve search engine rankings.",
-      icon: images.numb05,
+      icon: "src/public/images/numb-05.png",
     },
     {
       num: "03",
       title: "Feedback from specialists",
       desc: "Structure and visualize new knowledge. You send the practical work to the reviewing specialists and receive individual feedback.",
-      icon: images.numb06,
+      icon: "src/public/images/numb-06.png",
     },
   ];
 
@@ -734,7 +660,7 @@ const Syllabus = () => {
               className="relative"
             >
               <img
-                src={images.womenIlist}
+                src="src/public/images/women_ilist.png"
                 alt="Syllabus Illustration"
                 className="w-full pt-10 mx-auto"
                 referrerPolicy="no-referrer"
@@ -757,7 +683,7 @@ const Syllabus = () => {
                 >
                   {idx === 1 && !isMobile && (
                     <img
-                      src={images.arrowIlist}
+                      src="src/public/images/arrow-ilist.png"
                       alt="Arrow"
                       className="w-20 flex-shrink-0 scale-x-[-1]"
                       referrerPolicy="no-referrer"
@@ -788,7 +714,9 @@ const Syllabus = () => {
                       {idx !== 1 && !isMobile && (
                         <img
                           src={
-                            idx === 2 ? images.arrowAirplane : images.arrowIlist
+                            idx === 2
+                              ? "src/public/images/arrow-airplane-ilist.png"
+                              : "src/public/images/arrow-ilist.png"
                           }
                           alt="Arrow"
                           className={idx === 2 ? "w-40 mt-40" : "w-20 mt-40"}
@@ -820,24 +748,24 @@ const Courses = () => {
       title:
         "How to make a quality site in WordPress in 40 hours without experience",
       icon: <Layout className="text-orange-500" />,
-      illustr_01: images.design01,
-      illustr_02: images.design02,
+      illustr_01: "src/public/images/design-01.png",
+      illustr_02: "src/public/images/design-02.png",
     },
     {
       category: "programming",
       title:
         "WordPress: How to start in a developer without any basic knowledge",
       icon: <Code className="text-blue-500" />,
-      illustr_01: images.programming01,
-      illustr_02: images.programming02,
+      illustr_01: "src/public/images/programming-01.png",
+      illustr_02: "src/public/images/programming-02.png",
     },
     {
       category: "seo",
       title:
         "Creating dynamic sites with CMS WordPress + SEO for WordPress websites",
       icon: <Search className="text-emerald-500" />,
-      illustr_01: images.seo01,
-      illustr_02: images.seo02,
+      illustr_01: "src/public/images/seo-01.png",
+      illustr_02: "src/public/images/seo-02.png",
     },
   ];
 
@@ -863,7 +791,7 @@ const Courses = () => {
           left: 0,
           width: "100%",
           height: "100%",
-          backgroundImage: `url(${images.heroBg})`,
+          backgroundImage: `url(src/public/images/hero-bg.png)`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           transform: "scaleX(-1)",
@@ -979,17 +907,17 @@ const Reviews = () => {
     {
       name: "Sedanur Arslan",
       text: "The course is great! Teachers talks very interesting and accessible. Thank you very much!",
-      avatar: images.person01,
+      avatar: "src/public/images/person-01.png",
     },
     {
       name: "Yasir Alrawi",
       text: "The course is clear enough. Well explained a lot of practice. I recommend to everyone!",
-      avatar: images.person02,
+      avatar: "src/public/images/person-02.png",
     },
     {
       name: "Ahmed Ayhan",
       text: "The training was in one breath. Very accessible courses, everything is very clear and good.",
-      avatar: images.person03,
+      avatar: "src/public/images/person-03.png",
     },
   ];
 
@@ -1127,7 +1055,7 @@ const ContactForm = () => {
           : "min-h-screen flex flex-col justify-center rounded-b-[128px]"
       }
       style={{
-        backgroundImage: "url(" + images.footerBg + ")",
+        backgroundImage: "url(src/public/images/footer-bg.png)",
         backgroundSize: "cover",
         backgroundPosition: "center",
         minHeight: isMobile ? "auto" : "100%",
@@ -1255,12 +1183,12 @@ const ContactForm = () => {
           {/* Right illustration — desktop only */}
           <div className="relative hidden lg:flex items-end justify-center border-b-2 border-[#777]">
             <img
-              src={images.footerCom}
+              src="src/public/images/footer-com.png"
               className="absolute w-[90%]"
               referrerPolicy="no-referrer"
             />
             <img
-              src={images.footerYasir}
+              src="src/public/images/footer-yasir.png"
               alt="Questions Illustration"
               className="relative z-10 w-full"
               referrerPolicy="no-referrer"
@@ -1268,7 +1196,7 @@ const ContactForm = () => {
             <motion.img
               animate={{ x: [0, 18, 0], y: [0, -18, 0] }}
               transition={{ repeat: Infinity, duration: 5, ease: "easeInOut" }}
-              src={images.paperAirplane}
+              src="src/public/images/paper-airplane.png"
               className="absolute top-4 right-4 w-20 z-20"
               referrerPolicy="no-referrer"
             />
@@ -1309,7 +1237,7 @@ const Footer = () => {
         >
           <div className="flex items-center gap-3">
             <img
-              src={images.alrawiLogo}
+              src="src/public/images/alrawiLogo.png"
               alt="Alrawi"
               className={isMobile ? "h-10" : "h-12 mr-12"}
               referrerPolicy="no-referrer"
@@ -1317,7 +1245,11 @@ const Footer = () => {
           </div>
 
           {!isMobile && (
-            <img src={images.dahsedIlist} alt="" className="h-15" />
+            <img
+              src="src/public/images/dahsed-ilist.png"
+              alt=""
+              className="h-15"
+            />
           )}
 
           <div className="flex items-start gap-2">
@@ -1354,7 +1286,7 @@ const Footer = () => {
 
           {!isMobile && (
             <img
-              src={images.dahsedIlist}
+              src="src/public/images/dahsed-ilist.png"
               alt=""
               className="h-15"
             />
@@ -1393,18 +1325,23 @@ const Footer = () => {
           }
         >
           <div className="flex items-center gap-3">
-            <img src={images.alrawiikon} alt="Yasir Alrawi" className="h-7" />
+            <img
+              src="src/public/images/alrawiikon.png"
+              alt="Yasir Alrawi"
+              className="h-7"
+              referrerPolicy="no-referrer"
+            />
             <span className="text-[#888] text-xs uppercase tracking-widest">
               2026 Alrawi. All rights reserved
             </span>
           </div>
           <div className="flex items-center gap-5 text-[rgba(16,16,16,.2)]">
             {[
-              icoSoc01,
-              icoSoc02,
-              icoSoc03,
-              icoSoc04,
-              icoSoc05,
+              "src/public/images/ico_soc-01.svg",
+              "src/public/images/ico_soc-02.svg",
+              "src/public/images/ico_soc-03.svg",
+              "src/public/images/ico_soc-04.svg",
+              "src/public/images/ico_soc-05.svg",
             ].map((src, i) => (
               <a
                 key={i}
@@ -1484,3 +1421,4 @@ export default function App() {
     </div>
   );
 }
+

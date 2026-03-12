@@ -28,12 +28,114 @@ const useWidth = () => {
   return w;
 };
 
+// ─── Spring Scroll Utilities ─────────────────────────────────────────
+// Gerçek fizik tabanlı yay simülasyonu:
+// position ve velocity state'i her frame'de güncellenir,
+// hedefe yaklaştıkça yavaşlar, geçer (overshoot), geri döner → elastik his
+let springRAF: number | null = null;
+
+const springScrollTo = (targetY: number) => {
+  if (springRAF !== null) cancelAnimationFrame(springRAF);
+
+  // Yay sabitleri — stiffness düşük + damping düşük = çok elastik
+  const stiffness = 0.045;   // ne kadar sert çeker (düşük = yumuşak)
+  const damping   = 0.62;    // ne kadar sönümlenir (düşük = çok sallanır)
+  const mass      = 1;
+
+  let position = window.scrollY;
+  let velocity = 0;
+  let lastTime: number | null = null;
+
+  const step = (now: number) => {
+    const dt = lastTime ? Math.min((now - lastTime) / 16, 4) : 1; // normalize ~60fps
+    lastTime = now;
+
+    const force    = (targetY - position) * stiffness;
+    const damper   = velocity * damping;
+    const accel    = (force - damper) / mass;
+
+    velocity += accel * dt;
+    position += velocity * dt;
+
+    window.scrollTo(0, position);
+
+    // Yeterince yakınsa ve hız düştüyse dur
+    if (Math.abs(targetY - position) < 0.5 && Math.abs(velocity) < 0.5) {
+      window.scrollTo(0, targetY);
+      springRAF = null;
+      return;
+    }
+
+    springRAF = requestAnimationFrame(step);
+  };
+
+  springRAF = requestAnimationFrame(step);
+};
+
+const useSmoothNav = () => {
+  const handleNav = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    id: string,
+  ) => {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (!el) return;
+    const offset = 80;
+    const top = el.getBoundingClientRect().top + window.scrollY - offset;
+    springScrollTo(top);
+  };
+  return handleNav;
+};
+
+// ─── Scroll Progress Bar ───────────────────────────────────────────
+const ScrollProgressBar = () => {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const update = () => {
+      const el = document.documentElement;
+      const scrolled = el.scrollTop;
+      const total = el.scrollHeight - el.clientHeight;
+      setProgress(total > 0 ? (scrolled / total) * 100 : 0);
+    };
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        height: "3px",
+        zIndex: 9999,
+        background: "rgba(0,0,0,0.08)",
+      }}
+    >
+      <div
+        style={{
+          height: "100%",
+          background: "linear-gradient(90deg, #f6c7b2, #e8926f)",
+          width: `${progress}%`,
+          borderRadius: "0 2px 2px 0",
+          transition: "width 0.1s linear",
+        }}
+      />
+    </div>
+  );
+};
+
 // ─── Navbar ────────────────────────────────────────────────────────
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [signHovered, setSignHovered] = useState(false);
   const w = useWidth();
   const isMobile = w < 768;
+  const handleNav = useSmoothNav();
+
+  const NAV_ITEMS = ["ABOUT", "PROGRAM", "COURSES", "REVIEWS"];
 
   return (
     <nav
@@ -86,12 +188,13 @@ const Navbar = () => {
           {/* Desktop Nav Links */}
           {!isMobile && (
             <div style={{ display: "flex", alignItems: "center", gap: "40px" }}>
-              {["ABOUT", "PROGRAM", "COURSES", "REVIEWS"].map((item) => {
+              {NAV_ITEMS.map((item) => {
                 const [hovered, setHovered] = useState(false);
                 return (
                   <a
                     key={item}
                     href={`#${item.toLowerCase()}`}
+                    onClick={(e) => handleNav(e, item.toLowerCase())}
                     onMouseEnter={() => setHovered(true)}
                     onMouseLeave={() => setHovered(false)}
                     className="relative pb-1 text-white/90 hover:text-white font-semibold tracking-widest text-xl transition-opacity duration-200"
@@ -197,11 +300,14 @@ const Navbar = () => {
               gap: "18px",
             }}
           >
-            {["ABOUT", "PROGRAM", "COURSES", "REVIEWS"].map((item) => (
+            {NAV_ITEMS.map((item) => (
               <a
                 key={item}
                 href={`#${item.toLowerCase()}`}
-                onClick={() => setIsOpen(false)}
+                onClick={(e) => {
+                  handleNav(e, item.toLowerCase());
+                  setIsOpen(false);
+                }}
                 style={{
                   color: "white",
                   textDecoration: "none",
@@ -245,6 +351,7 @@ const Hero = () => {
 
   return (
     <section
+      id="about"
       style={{
         backgroundImage: "url(src/public/images/hero-bg.png)",
         backgroundSize: "cover",
@@ -845,7 +952,6 @@ const Reviews = () => {
               transition={{ delay: idx * 0.12 }}
               className="relative flex flex-col items-center text-center px-12"
             >
-              {/* Desktop: vertical divider. Mobile: top border */}
               {idx !== 0 && !isMobile && (
                 <div
                   className="absolute left-0 top-0 h-full"
@@ -1074,7 +1180,7 @@ const ContactForm = () => {
             )}
           </div>
 
-          {/* Right illustration — desktop only (unchanged) */}
+          {/* Right illustration — desktop only */}
           <div className="relative hidden lg:flex items-end justify-center border-b-2 border-[#777]">
             <img
               src="src/public/images/footer-com.png"
@@ -1117,83 +1223,192 @@ const ContactForm = () => {
 const Footer = () => {
   const w = useWidth();
   const isMobile = w < 768;
- 
+  const handleNav = useSmoothNav();
+
   return (
     <footer className="pt-12 pb-0" style={{ background: "#f5ede0" }}>
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className={isMobile ? "flex flex-col gap-8 py-10" : "flex flex-wrap items-center justify-between gap-8 py-10"}>
+        <div
+          className={
+            isMobile
+              ? "flex flex-col gap-8 py-10"
+              : "flex flex-wrap items-center justify-between gap-8 py-10"
+          }
+        >
           <div className="flex items-center gap-3">
-            <img src="src/public/images/alrawiLogo.png" alt="Alrawi" className={isMobile ? "h-10" : "h-12 mr-12"} referrerPolicy="no-referrer" />
+            <img
+              src="src/public/images/alrawiLogo.png"
+              alt="Alrawi"
+              className={isMobile ? "h-10" : "h-12 mr-12"}
+              referrerPolicy="no-referrer"
+            />
           </div>
- 
-          {!isMobile && <img src="src/public/images/dahsed-ilist.png" alt="" className="h-15" />}
- 
+
+          {!isMobile && (
+            <img
+              src="src/public/images/dahsed-ilist.png"
+              alt=""
+              className="h-15"
+            />
+          )}
+
           <div className="flex items-start gap-2">
             <div className="grid grid-cols-2 gap-x-10 gap-y-2">
               {["About", "Courses", "Program", "Reviews"].map((item) => {
                 const [hovered, setHovered] = useState(false);
                 return (
-                  <a key={item} href={`#${item.toLowerCase()}`}
-                    onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}
+                  <a
+                    key={item}
+                    href={`#${item.toLowerCase()}`}
+                    onClick={(e) => handleNav(e, item.toLowerCase())}
+                    onMouseEnter={() => setHovered(true)}
+                    onMouseLeave={() => setHovered(false)}
                     className="relative pb-1 text-[#555] font-normal uppercase hover:text-[#1a1a1a] transition-colors"
-                    style={{ textDecoration: "none", fontSize: isMobile ? "13px" : "18px", letterSpacing: isMobile ? "0.5px" : "0.1em" }}>
+                    style={{
+                      textDecoration: "none",
+                      fontSize: isMobile ? "13px" : "18px",
+                      letterSpacing: isMobile ? "0.5px" : "0.1em",
+                    }}
+                  >
                     {item}
-                    <span className="absolute bottom-0 left-0 h-0.5 w-full rounded-full bg-[#555] transition-transform duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
-                      style={{ transform: hovered ? "scaleX(1)" : "scaleX(0)", transformOrigin: hovered ? "left" : "right" }} />
+                    <span
+                      className="absolute bottom-0 left-0 h-0.5 w-full rounded-full bg-[#555] transition-transform duration-[350ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+                      style={{
+                        transform: hovered ? "scaleX(1)" : "scaleX(0)",
+                        transformOrigin: hovered ? "left" : "right",
+                      }}
+                    />
                   </a>
                 );
               })}
             </div>
           </div>
- 
-          {!isMobile && <img src="src/public/images/dahsed-ilist.png" alt="" className="h-15" />}
- 
-          <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? "6px" : "0 0" }}>
-            {["www.yasiralrawi.com", "+90 555 555 55 55", "Ankara, Türkiye", "yasir7alrawi23@gmail.com"].map((item) => (
-              <span key={item} className="text-[#555] font-normal tracking-wide" style={{ fontSize: isMobile ? "15px" : "18px" }}>{item}</span>
+
+          {!isMobile && (
+            <img
+              src="src/public/images/dahsed-ilist.png"
+              alt=""
+              className="h-15"
+            />
+          )}
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+              gap: isMobile ? "6px" : "0 0",
+            }}
+          >
+            {[
+              "www.yasiralrawi.com",
+              "+90 555 555 55 55",
+              "Ankara, Türkiye",
+              "yasir7alrawi23@gmail.com",
+            ].map((item) => (
+              <span
+                key={item}
+                className="text-[#555] font-normal tracking-wide"
+                style={{ fontSize: isMobile ? "15px" : "18px" }}
+              >
+                {item}
+              </span>
             ))}
           </div>
         </div>
- 
-        <div style={{ borderTop: "1px solid #ddd4c4" }} className={isMobile ? "flex flex-col gap-4 py-6" : "flex flex-wrap items-center justify-between gap-6 py-6"}>
+
+        <div
+          style={{ borderTop: "1px solid #ddd4c4" }}
+          className={
+            isMobile
+              ? "flex flex-col gap-4 py-6"
+              : "flex flex-wrap items-center justify-between gap-6 py-6"
+          }
+        >
           <div className="flex items-center gap-3">
-            <img src="src/public/images/alrawiikon.png" alt="Yasir Alrawi" className="h-7" referrerPolicy="no-referrer" />
-            <span className="text-[#888] text-xs uppercase tracking-widest">2026 Alrawi. All rights reserved</span>
+            <img
+              src="src/public/images/alrawiikon.png"
+              alt="Yasir Alrawi"
+              className="h-7"
+              referrerPolicy="no-referrer"
+            />
+            <span className="text-[#888] text-xs uppercase tracking-widest">
+              2026 Alrawi. All rights reserved
+            </span>
           </div>
           <div className="flex items-center gap-5 text-[rgba(16,16,16,.2)]">
-            {["src/public/images/ico_soc-01.svg", "src/public/images/ico_soc-02.svg", "src/public/images/ico_soc-03.svg", "src/public/images/ico_soc-04.svg", "src/public/images/ico_soc-05.svg"].map((src, i) => (
-              <a key={i} href="#" className="group w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200"
+            {[
+              "src/public/images/ico_soc-01.svg",
+              "src/public/images/ico_soc-02.svg",
+              "src/public/images/ico_soc-03.svg",
+              "src/public/images/ico_soc-04.svg",
+              "src/public/images/ico_soc-05.svg",
+            ].map((src, i) => (
+              <a
+                key={i}
+                href="#"
+                className="group w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200"
                 style={{ background: "transparent" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "#4f94b2")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}>
-                <img src={src} alt="social" className="border rounded-full border-[rgba(16,16,16,.2)] transition-all duration-200"
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.background = "#4f94b2")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = "transparent")
+                }
+              >
+                <img
+                  src={src}
+                  alt="social"
+                  className="border rounded-full border-[rgba(16,16,16,.2)] transition-all duration-200"
                   style={{ filter: "brightness(0)", opacity: 0.6 }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLImageElement).style.filter = "brightness(0) invert(1)"; (e.currentTarget as HTMLImageElement).style.opacity = "1"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLImageElement).style.filter = "brightness(0)"; (e.currentTarget as HTMLImageElement).style.opacity = "0.6"; }}
-                  referrerPolicy="no-referrer" />
+                  onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.filter =
+                      "brightness(0) invert(1)";
+                    (e.currentTarget as HTMLImageElement).style.opacity = "1";
+                  }}
+                  onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.filter =
+                      "brightness(0)";
+                    (e.currentTarget as HTMLImageElement).style.opacity = "0.6";
+                  }}
+                  referrerPolicy="no-referrer"
+                />
               </a>
             ))}
           </div>
         </div>
- 
-        <div style={{ borderTop: "1px solid #ddd4c4" }} className="py-5 text-center">
+
+        <div
+          style={{ borderTop: "1px solid #ddd4c4" }}
+          className="py-5 text-center"
+        >
           <p className="text-[#888] text-sm">
             <span className="text-rose-400">♥</span>{" "}
-            <a href="https://www.linkedin.com/in/yasir-alrawi-12814521a/" className="text-[#555] underline hover:text-[#1a1a1a] transition-colors">Like</a>
+            <a
+              href="https://www.linkedin.com/in/yasir-alrawi-12814521a/"
+              className="text-[#555] underline hover:text-[#1a1a1a] transition-colors"
+            >
+              Like
+            </a>
             {" & "}
-            <a href="https://www.linkedin.com/in/yasir-alrawi-12814521a/" className="text-[#555] underline hover:text-[#1a1a1a] transition-colors">Follow</a>
+            <a
+              href="https://www.linkedin.com/in/yasir-alrawi-12814521a/"
+              className="text-[#555] underline hover:text-[#1a1a1a] transition-colors"
+            >
+              Follow
+            </a>
             {" from you. New free to use projects from us."}
           </p>
         </div>
       </div>
     </footer>
   );
-}
+};
 
 // ─── App ────────────────────────────────────────────────────────────
 export default function App() {
   return (
     <div className="min-h-screen">
+      <ScrollProgressBar />
       <Navbar />
       <main>
         <Hero />

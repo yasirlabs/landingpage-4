@@ -11,6 +11,10 @@
   --color-brand-text: #0f86a1;
 }
 
+html {
+  scroll-behavior: auto; /* JS ile yönetiyoruz */
+}
+
 body {
   @apply bg-brand-bg text-slate-900 font-sans antialiased;
 }
